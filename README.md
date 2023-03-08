@@ -3,7 +3,7 @@
 ## Related repositories
 
 - [**NEMP Protocol**](https://github.com/libersoft-org/nemp-protocol) - NEMP protocol documentation
-- [**NEMP Installer**](https://github.com/libersoft-org/nemp-install) - Installer for NEMP server and client software
+- [**NEMP Install**](https://github.com/libersoft-org/nemp-install) - Installer for NEMP server and client software
 - [**NEMP Server**](https://github.com/libersoft-org/nemp-server) - Server implementation of NEMP protocol
 - [**NEMP Web Admin**](https://github.com/libersoft-org/nemp-admin-web) - Web administration software for NEMP Server
 - [**NEMP Web Client**](https://github.com/libersoft-org/nemp-client-web) - Web client implementation of NEMP protocol
