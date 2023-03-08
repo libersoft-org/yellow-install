@@ -1,8 +1,8 @@
-# The New E-Mail Protocol (NEMP) - server and client software installation and configuration
+# The New E-Mail Protocol (NEMP) - server and client software installer
 
 ## Installation
 
-These are the installation instructions of server and client software for the different Linux distributions.
+These are the instructions how to download this installer for the different Linux distributions.
 
 **IMPORTANT NOTE**: It is recommended to install this software on a clean OS installation, otherwise it may cause that other software previously installed on your server could stop working properly due to this. You are using this software at your own risk.
 
