@@ -6,7 +6,7 @@
 - [**NEMP Installer**](https://github.com/libersoft-org/nemp-install) - Installer for NEMP server and client software
 - [**NEMP Server**](https://github.com/libersoft-org/nemp-server) - Server implementation of NEMP protocol
 - [**NEMP Web Admin**](https://github.com/libersoft-org/nemp-admin-web) - Web administration software for NEMP Server
-- [**NEMP Web Client**](https://github.com/libersoft-org/nemp-client-web) - Web client implementation od NEMP protocol
+- [**NEMP Web Client**](https://github.com/libersoft-org/nemp-client-web) - Web client implementation of NEMP protocol
 - [**WebSocket Developer Console**](https://github.com/libersoft-org/websocket-console) - Web application that helps developers to communicate easily with NEMP Server using JSON commands
 
 ## Installation
