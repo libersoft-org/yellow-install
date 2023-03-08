@@ -44,7 +44,7 @@ cd nemp-install
 
 ## License
 
-This software is developed as an opensource under [**Unlicense**](./LICENSE).
+This software is developed as an open source under [**Unlicense**](./LICENSE).
 
 ## Donations
 
