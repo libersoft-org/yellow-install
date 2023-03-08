@@ -1,5 +1,14 @@
 # The New E-Mail Protocol (NEMP) - server and client software installer
 
+## Related repositories
+
+- [**NEMP Protocol**](https://github.com/libersoft-org/nemp-installer) - NEMP protocol documentation
+- [**NEMP Installer**](https://github.com/libersoft-org/nemp-installer) - NEMP installer for server and client software
+- [**NEMP Server**](https://github.com/libersoft-org/nemp-server) - NEMP server software
+- [**NEMP Web Admin**](https://github.com/libersoft-org/nemp-admin-web) - NEMP administration web software
+- [**NEMP Web Client**](https://github.com/libersoft-org/nemp-client-web) - NEMP client web software
+- [**WebSocket Console**](https://github.com/libersoft-org/websocket-console) - WebSocket developer console web software
+
 ## Installation
 
 These are the instructions how to download this installer for the different Linux distributions.
@@ -35,7 +44,7 @@ cd nemp-install
 
 ## License
 
-- This software is developed as an opensource under [**Unlicense**](./LICENSE).
+This software is developed as an opensource under [**Unlicense**](./LICENSE).
 
 ## Donations
 
