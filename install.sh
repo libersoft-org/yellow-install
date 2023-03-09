@@ -1,10 +1,10 @@
 #!/bin/bash
 
-USER_HOME=$(getent passwd $USER | cut -d: -f6)
+HOME_DIRECTORY=$(getent passwd $USER | cut -d: -f6)
 
 # SERVER:
 
-SERVER_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP Server installation directory:" 10 60 "$USER_HOME/nemp" 3>&1 1>&2 2>&3)
+SERVER_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP Server installation directory:" 10 60 "$HOME_DIRECTORY/nemp" 3>&1 1>&2 2>&3)
 if [ -z "$SERVER_INSTALL_DIR" ]; then
  whiptail --msgbox "Invalid installation directory." 10 60
  exit 1
@@ -36,43 +36,59 @@ whiptail --title "Installing npm packages" --gauge "Please wait..." 6 50 0 < <(
 )
 
 #NEMP SERVER - DEBIAN:
-#apt -y install curl screen certbot whiptail
-#curl -fsSL https://deb.nodesource.com/setup_19.x | bash -
-#apt -y install nodejs
-#npm i -g npm
-#git clone https://github.com/libersoft-org/nemp-server.git
-#cd nemp-server/src/
-#npm i
+
+## Downloading Node.js ...
+##curl -fsSL https://deb.nodesource.com/setup_19.x | bash -
+
+## Installing packages ...
+##apt -y install screen certbot whiptail nodejs
+
+## Installing NPM package ...
+##npm i -g npm
+
+## Downloading NEMP Server ...
+##git clone https://github.com/libersoft-org/nemp-server.git
+
+## Installing NEMP Server NPM dependencies ...
+##cd $SERVER_CUSTOM_DIR/
+##npm i
 
 #NEMP SERVER - CENTOS:
-#dnf -y install curl screen certbot whiptail
-#curl -fsSL https://rpm.nodesource.com/setup_19.x | bash -
-#dnf -y install nodejs
-#npm i -g npm
-#git clone https://github.com/libersoft-org/nemp-server.git
-#cd nemp-server/src/
-#npm i
+
+## Downloading Node.js ...
+##curl -fsSL https://rpm.nodesource.com/setup_19.x | bash -
+
+## Installing packages ...
+##dnf -y install screen certbot whiptail nodejs
+
+## Installing NPM package ...
+##npm i -g npm
+
+## Downloading NEMP Server ...
+##git clone https://github.com/libersoft-org/nemp-server.git
+
+## Installing NEMP Server NPM dependencies ...
+##cd $SERVER_CUSTOM_DIR/
+##npm i
 
 ## NEMP SERVER CONFIGURATION
 
-#WHIPTAIL - Would you like to create a new server settings file?
+#WHIPTAIL - Would you like to create a new settings file?
 #node index.js --create-settings
-
-#WHIPTAIL - Would you like to create a new server database file?
-#node index.js --create-database
-
-#WHIPTAIL - Would you like to create a new server admin account?
-#node index.js --create-admin
-
-#WHIPTAIL - Would you like to create a new server HTTPS certificate?
+#WHIPTAIL - Would you like to create a new HTTPS certificate?
 #./cert.sh
-
-#WHIPTAIL - Would you like to add HTTPS server certificate renewal to crontab?
+#WHIPTAIL - Would you like to add a HTTPS server certificate renewal to crontab?
 #crontab -e
 #... and add this line at the end:
 #0 12 * * * /usr/bin/certbot renew --quiet
 
+#WHIPTAIL - Would you like to create a new database file?
+#node index.js --create-database
+#WHIPTAIL - Would you like to create a new admin account?
+#node index.js --create-admin
+
 #WHIPTAIL - NEMP Server installation complete.
+
 #Now you can just start the server using:
 #./start.sh
 #If you need some additional configuration, just edit the **settings.json** file.
@@ -95,30 +111,21 @@ whiptail --title "Installing npm packages" --gauge "Please wait..." 6 50 0 < <(
 
 # CLIENTS:
 
-CLIENTS_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP Client installation directory:" 10 60 "$USER_HOME/nemp/www" 3>&1 1>&2 2>&3)
+CLIENTS_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP Client installation directory:" 10 60 "$HOME_DIRECTORY/nemp/www" 3>&1 1>&2 2>&3)
 if [ -z "$INSTALL_DIR" ]; then
  whiptail --msgbox "Invalid installation directory." 10 60
  exit 1
 fi
 
-CLIENTS=(\
- '1=("NEMP Web Admin" "admin" "libersoft-org" "nemp-admin-web")'\
- '2=("NEMP Web Client" "client" "libersoft-org" "nemp-client-web")'\
- '3=("WebSocket Developer Console" "console" "libersoft-org" "websocket-console")'\
-)
-
-whiptail \
---title "NEMP client software installer" \
---checklist "\nWhat client software would you like to install on NEMP web server?" 13 40 ${#CLIENTS[@]} \
-1 "NEMP Web Admin" ON \
-2 "NEMP Web Client" ON \
-3 "WebSocket Developer Console" ON
-
-whiptail --msgbox "Installation done. You can run the server using $SERVER_INSTALL_DIR/start.sh." 10 60
+# "NEMP Web Admin" "$HOME_DIRECTORY/nemp/www/admin" "libersoft-org/nemp-admin-web
+# "NEMP Web Client" "$HOME_DIRECTORY/nemp/www/client" "libersoft-org/nemp-client-web")
+# "WebSocket Developer Console" "$HOME_DIRECTORY/nemp/www/console" "libersoft-org/websocket-console"
 
 # TODO: Download each client and install it in the web root path
+
+# Downloading NEMP Web Admin ...
 #git clone https://github.com/libersoft-org/nemp-admin-web.git
-#mv ./nemp-admin-web/src/* $WEB_PATH/admin/
+#cp ./nemp-admin-web/src/* $WEB_PATH/admin/
 #rm -rf ./nemp-admin-web
 
 # TODO: show progress bar of git clone & cp

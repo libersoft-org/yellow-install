@@ -23,7 +23,7 @@ Log in as "root" on your server and run the following commands to download the n
 cd /root/
 apt update
 apt -y upgrade
-apt -y install git
+apt -y install git curl
 git clone https://github.com/libersoft-org/nemp-install.git
 cd nemp-install
 ./install.sh
@@ -36,7 +36,7 @@ Log in as "root" on your server and run the following commands to download the n
 ```console
 cd /root/
 dnf -y update
-dnf -y install git
+dnf -y install git curl
 git clone https://github.com/libersoft-org/nemp-install.git
 cd nemp-install
 ./install.sh
