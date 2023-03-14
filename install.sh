@@ -1,5 +1,21 @@
 # #!/bin/bash
 
+# Install whiptail if it's not already installed
+if ! command -v whiptail >/dev/null 2>&1; then
+  if command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get update
+    sudo apt-get install -y whiptail
+  elif command -v yum >/dev/null 2>&1; then
+    sudo yum update
+    sudo yum install -y whiptail
+  else
+    echo "Could not install whiptail: package manager not found"
+    exit 1
+  fi
+fi
+# end auto-install
+
+
 USER_HOME=$(getent passwd $USER | cut -d: -f6)
 
 export STYLES='
@@ -35,20 +51,34 @@ if [ -z "$installation_repo" ]; then
 fi
 case $installation_repo in
   "NEMP Server")
+    cd ../ && rm nemp-server2 -rf && cd nemp-install
     SERVER_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP Server installation directory:" 10 60 "$USER_HOME/nemp-server" 3>&1 1>&2 2>&3)
     if [ -z "$SERVER_INSTALL_DIR" ]; then
       whiptail --msgbox "Invalid installation directory." 10 60
       exit 1
     fi
     if [ ! -d "$SERVER_INSTALL_DIR" ]; then
-      echo "Directory does not exist, creating new: $SERVER_INSTALL_DIR"
-      mkdir $SERVER_INSTALL_DIR
+      {
+        mkdir $SERVER_INSTALL_DIR
+        echo -e "XXX\n28\nDirectory does not exist, creating new: $SERVER_INSTALL_DIR\nXXX"
+        sleep 0.5
+        echo -e "XXX\n74\nDirectory does not exist, creating new: $SERVER_INSTALL_DIR\nXXX"
+        sleep 0.5
+        echo -e "XXX\n100\nCreated target directory $SERVER_INSTALL_DIR\nXXX"
+        sleep 1
+      } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $SERVER_INSTALL_DIR" 15 110 0
+
     fi
     cd $SERVER_INSTALL_DIR
-    case "${os_info[ID]}" in
+    case "${os_info[ID]}" in # debian and centos available, more distors to add later
       "debian")
+        # forcefully update node and npm by uninstalling and reinstalling. uncomment below
+        # apt remove nodejs -f
+        # apt remove npm -f
+        # apt install nodejs -f
+        # apt install npm -f
+
         {
-          output_file=$(mktemp)
           curl -fsSL https://deb.nodesource.com/setup_19.x bash - 
           echo -e "XXX\n10\nPlease wait while installing node.js...\nXXX"
           sleep 4
@@ -56,6 +86,46 @@ case $installation_repo in
           sleep 0.5
           echo -e "XXX\n20\nInstalling packages....\nXXX"
           apt -y install screen certbot whiptail nodejs curl > /tmp/apt_output.txt 2>&1 &
+          PID=$!
+          while kill -0 $PID >/dev/null 2>&1; do
+              echo "XXX\n20\nInstalling packages: $(tail -n 1 /tmp/apt_output.txt)\nXXX"
+              sleep 4
+          done
+          echo -e "XXX\n45\nPackages installed successfully\nXXX"
+          rm /tmp/apt_output.txt
+          sleep 0.5
+          apt-get install -y npm
+          echo -e "XXX\n45\nInstaling npm...\nXXX"
+          sleep 5
+          echo -e "XXX\n60\nNPM installed successfully.\nXXX"
+          sleep 0.5
+          git clone https://github.com/libersoft-org/nemp-server.git
+          echo -e "XXX\n60\nCloning nemp-server.....\nXXX"
+          sleep 4
+          echo -e "XXX\n95\nNemp server cloned successfully.\nXXX"
+          sleep 0.5
+          cd nemp-server/src
+          npm i
+          echo -e "XXX\n95\nInstaling server npm packages...\nXXX"
+          sleep 5
+          echo -e "XXX\n100\nInstall complete.\nXXX"
+          sleep 1 
+        } | whiptail --title "Server installation" --gauge "Running install...." 15 110 0
+        mv $SERVER_INSTALL_DIR/nemp-server/src/* $SERVER_INSTALL_DIR
+        rm $SERVER_INSTALL_DIR/nemp-server -rf
+        echo "running server install on debian"
+        echo ""
+        ;;
+      "centos")
+        {
+          
+          curl -fsSL https://deb.nodesource.com/setup_19.x | bash -
+          echo -e "XXX\n10\nPlease wait while installing node.js...\nXXX"
+          sleep 4
+          echo -e "XXX\n20\nNode.Js installed successfully.\nXXX"
+          sleep 0.5
+          echo -e "XXX\n20\nInstalling packages....\nXXX"
+          dnf -y install screen certbot whiptail nodejs curl > /tmp/apt_output.txt 2>&1 &
           PID=$!
           while kill -0 $PID >/dev/null 2>&1; do
               echo "XXX\n20\nInstalling packages: $(tail -n 1 /tmp/apt_output.txt)\nXXX"
@@ -75,64 +145,74 @@ case $installation_repo in
           echo -e "XXX\n95\nNemp server cloned successfully.\nXXX"
           sleep 0.5
           cd nemp-server/src
-          npm i -g
+          npm i # nto working here for some reason
+          echo ls
           echo -e "XXX\n95\nInstaling server npm packages...\nXXX"
           sleep 5
           echo -e "XXX\n100\nInstall complete.\nXXX"
           sleep 1
         } | whiptail --title "Server installation" --gauge "Running install...." 15 110 0
-        echo "running server install on debian"
-        ;;
-      "centos")
-        curl -fsSL https://deb.nodesource.com/setup_19.x | bash -
-        whiptail --msgbox "Downloading nodejs" 15 110
-        dnf -y install screen certbot whiptail nodejs curl # curl optional?
-        whiptail --msgbox "Installing packagaes" 15 110
-        npm i -g npm
-        whiptail --msgbox "Installing npm" 15 110
-        git clone https://github.com/libersoft-org/nemp-server.git
-        cd nemp-server/src/
-        npm i
-        echo "centos"
+        echo "running server install on centos"
         ;;
     esac
     init_settings=$(whiptail --title "Create settings" --menu "Would you like to create a new server settings file?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
     case $init_settings in
-      "no")
+      "No")
         whiptail --msgbox "Installed server, exiting...." 15 110
         exit 1
         ;;
-      "yes")
+      "Yes")
+        echo ""
         node index.js --create-settings
-        whiptail --msgbox "Creating settings...." 15 110
+        {
+          echo -e "XXX\n45\nInitializing settings....\nXXX"
+          sleep 0.5
+          echo -e "XXX\n92\nInitializing settings....\nXXX"
+          sleep 0.5
+          echo -e "XXX\n100\nCreated default settings\nXXX"
+          sleep 1
+        } | whiptail --title "Server settings installation" --gauge "Initializing settings...." 15 110 0
+     
         init_https_certificate=$(whiptail --title "Create https certificate" --menu "Would you like to create a new https certificate?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
         case $init_https_certificate in
-          "no")
+          "No")
             whiptail --msgbox "Installed server and added default settings, exiting...." 15 110
             exit 1
             ;;
-          "yes")
+          "Yes")
             ./cert.sh
-            whiptail --msgbox "Creating https certificate...." 15 110
+            {
+              echo -e "XXX\n100\nCreated https certificate\nXXX"
+              sleep 1
+            } | whiptail --title "Server settings installation" --gauge "Creating https certificate...." 15 110 0
+
             init_database=$(whiptail --title "Create admin" --menu "Would you like to create a new database?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
             case $init_database in
-              "no")
+              "No")
                 whiptail --msgbox "Installed server, added default settings and https certificate, exiting...." 15 110
                 exit 1
                 ;;
-              "yes")
+              "Yes")
                 node index.js --create-database
-                whiptail --msgbox "Creating database...." 15 110
+                {
+                  echo -e "XXX\n59\nCreated database\nXXX"
+                  sleep 1
+                } | whiptail --title "Server settings installation" --gauge "Creating database...." 15 110 0
+        
                 init_admin=$(whiptail --title "Create admin" --menu "Would you like to create a new admin account?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
                 case $init_admin in
-                  "no")
+                  "No")
                     whiptail --msgbox "Installed server, added default settings, https certificate and created new database, exiting...." 15 110
                     exit 1
                     ;;
-                  "yes")
+                  "Yes")
                     node index.js --create-admin
-                    whiptail --msgbox "Installed server and all default information. Start the server: node index.js" 15 110
-                    ;;
+                    {
+                      echo -e "XXX\n100\nCreated admin\nXXX"
+                      sleep 1
+                    } | whiptail --title "Server settings installation" --gauge "Creating admin...." 15 110 0
+                    whiptail --msgbox "Installed server completed successfully\n\nYou can start the server by running './start.sh'\nAttach to the screen by running 'screen -x nemp'\n\nAdditionally, you can start by running 'node index.js'.\nTo stop the server just press **CTRL+C**" 15 110
+                      ;;
                 esac
               ;;
             esac
@@ -207,7 +287,7 @@ case $installation_repo in
     whiptail --msgbox "Downloaded console web successfully" 15 110
     ;;
   *)
-    whiptail --msgbox "invalid choice" 15 110 #todo: add multiple selections later
+    whiptail --msgbox "invalid choice" 15 110
     ;;
 esac
 # SERVER_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP Server installation directory:" 10 60 "$USER_HOME/nemp-server" 3>&1 1>&2 2>&3)
