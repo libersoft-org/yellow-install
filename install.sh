@@ -1,6 +1,6 @@
 # #!/bin/bash
 
-# USER_HOME=$(getent passwd $USER | cut -d: -f6)
+USER_HOME=$(getent passwd $USER | cut -d: -f6)
 
 export STYLES='
   window=,black
@@ -11,21 +11,21 @@ export STYLES='
 #  select installation
 
 options=(\
- "yes" "" \
- "no" "" \
+ "Yes" "" \
+ "No" "" \
 )
-platform=(\
- "debian" "" \
- "centos" "" \
-)
-repos=(\
- "nemp-server" "('NEMP Server')" \
- "admin-web" "('NEMP Web Admin')" \
- "client-web" "('NEMP Web Client')" \
- "web-console" "('WebSocket Developer Console')" \
-)
-installation_platform=$(whiptail --title "Select platform to run" --menu "Choose an option:" 15 110 4 "${platform[@]}" 3>&1 1>&2 2>&3)
 
+declare -A os_info
+while IFS='=' read -r key value; do
+  os_info["$key"]="$value"
+done < "/etc/os-release"
+
+repos=(\
+ "NEMP Server" ""  \
+ "NEMP Web Admin" "" \
+ "NEMP Web Client" "" \
+ "WebSocket Developer Console" "" \
+)
 installation_repo=$(whiptail --title "Select software to install" --menu "Choose an option:" 15 110 4 "${repos[@]}" 3>&1 1>&2 2>&3)
 
 # # SERVER:
@@ -34,25 +34,53 @@ if [ -z "$installation_repo" ]; then
  exit 1
 fi
 case $installation_repo in
-  "nemp-server")
+  "NEMP Server")
     SERVER_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP Server installation directory:" 10 60 "$USER_HOME/nemp-server" 3>&1 1>&2 2>&3)
     if [ -z "$SERVER_INSTALL_DIR" ]; then
       whiptail --msgbox "Invalid installation directory." 10 60
       exit 1
     fi
-    cd ../$SERVER_INSTALL_DIR
-    case $installation_platform in
+    if [ ! -d "$SERVER_INSTALL_DIR" ]; then
+      echo "Directory does not exist, creating new: $SERVER_INSTALL_DIR"
+      mkdir $SERVER_INSTALL_DIR
+    fi
+    cd $SERVER_INSTALL_DIR
+    case "${os_info[ID]}" in
       "debian")
-        curl -fsSL https://deb.nodesource.com/setup_19.x | bash -
-        whiptail --msgbox "Downloading nodejs" 15 110
-        apt -y install screen certbot whiptail nodejs curl # curl optional?
-        whiptail --msgbox "Installing packagaes" 15 110
-        npm i -g npm
-        whiptail --msgbox "Installing npm" 15 110
-        git clone https://github.com/libersoft-org/nemp-server.git
-        cd nemp-server/src/
-        npm i
-        whiptail --msgbox "Installing NEMP Server NPM dependencies" 15 110
+        {
+          output_file=$(mktemp)
+          curl -fsSL https://deb.nodesource.com/setup_19.x bash - 
+          echo -e "XXX\n10\nPlease wait while installing node.js...\nXXX"
+          sleep 4
+          echo -e "XXX\n20\nNode.Js installed successfully.\nXXX"
+          sleep 0.5
+          echo -e "XXX\n20\nInstalling packages....\nXXX"
+          apt -y install screen certbot whiptail nodejs curl > /tmp/apt_output.txt 2>&1 &
+          PID=$!
+          while kill -0 $PID >/dev/null 2>&1; do
+              echo "XXX\n20\nInstalling packages: $(tail -n 1 /tmp/apt_output.txt)\nXXX"
+              sleep 4
+          done
+          echo -e "XXX\n45\nPackages installed successfully\nXXX"
+          rm /tmp/apt_output.txt
+          sleep 0.5
+          npm i -g npm
+          echo -e "XXX\n45\nInstaling npm...\nXXX"
+          sleep 5
+          echo -e "XXX\n60\nNPM installed successfully.\nXXX"
+          sleep 0.5
+          git clone https://github.com/libersoft-org/nemp-server.git
+          echo -e "XXX\n60\nCloning nemp-server.....\nXXX"
+          sleep 4
+          echo -e "XXX\n95\nNemp server cloned successfully.\nXXX"
+          sleep 0.5
+          cd nemp-server/src
+          npm i -g
+          echo -e "XXX\n95\nInstaling server npm packages...\nXXX"
+          sleep 5
+          echo -e "XXX\n100\nInstall complete.\nXXX"
+          sleep 1
+        } | whiptail --title "Server installation" --gauge "Running install...." 15 110 0
         echo "running server install on debian"
         ;;
       "centos")
@@ -86,7 +114,7 @@ case $installation_repo in
           "yes")
             ./cert.sh
             whiptail --msgbox "Creating https certificate...." 15 110
-            init_database=$(whiptail --title "Create admin" --menu "Would you like to create a new database file?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
+            init_database=$(whiptail --title "Create admin" --menu "Would you like to create a new database?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
             case $init_database in
               "no")
                 whiptail --msgbox "Installed server, added default settings and https certificate, exiting...." 15 110
@@ -95,7 +123,7 @@ case $installation_repo in
               "yes")
                 node index.js --create-database
                 whiptail --msgbox "Creating database...." 15 110
-                init_admin=$(whiptail --title "Create admin" --menu "Would you like to create a new admin file?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
+                init_admin=$(whiptail --title "Create admin" --menu "Would you like to create a new admin account?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
                 case $init_admin in
                   "no")
                     whiptail --msgbox "Installed server, added default settings, https certificate and created new database, exiting...." 15 110
@@ -114,14 +142,18 @@ case $installation_repo in
     esac
     cd ../
     ;;
-  "admin-web")
+  "NEMP Web Admin")
     CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/data/www" 3>&1 1>&2 2>&3)
     if [ -z "$CLIENT_INSTALL_DIR" ]; then
       whiptail --msgbox "Invalid installation directory." 10 60
       exit 1
     fi
+    if [ ! -d "$CLIENT_INSTALL_DIR" ]; then
+      echo "Directory does not exist, creating new: $CLIENT_INSTALL_DIR"
+      mkdir $CLIENT_INSTALL_DIR
+    fi
     cd ../
-    rm $CLIENT_INSTALL_DIR -rf && mkdir $CLIENT_INSTALL_DIR/admin && cd $CLIENT_INSTALL_DIR
+    rm $CLIENT_INSTALL_DIR/admin -rf && mkdir $CLIENT_INSTALL_DIR/admin && cd $CLIENT_INSTALL_DIR
     whiptail --title "Downloading admin web" --gauge "Cloning repository" 6 60 0 < <(
       git clone --progress https://github.com/libersoft-org/nemp-admin-web.git 2>&1 | while read line; do
       percent=$(echo $line | grep -o "[0-9]\{1,3\}%" | tr -d '%')
@@ -134,7 +166,7 @@ case $installation_repo in
     cd ../ && rm nemp-admin-web -rf
     whiptail --msgbox "Downloaded admin web successfully" 15 110
     ;;
-  "client-web")
+  "NEMP Web Client")
     CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/data/www" 3>&1 1>&2 2>&3)
     if [ -z "$CLIENT_INSTALL_DIR" ]; then
       whiptail --msgbox "Invalid installation directory." 10 60
@@ -154,7 +186,7 @@ case $installation_repo in
     cd ../ && rm nemp-client-web -rf
     whiptail --msgbox "Downloaded client web successfully" 15 110
     ;;
-  "console")
+  "WebSocket Developer Console")
     CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/data/www" 3>&1 1>&2 2>&3)
     if [ -z "$CLIENT_INSTALL_DIR" ]; then
       whiptail --msgbox "Invalid installation directory." 10 60
