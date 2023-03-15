@@ -17,7 +17,6 @@ fi
 
 
 USER_HOME=$(getent passwd $USER | cut -d: -f6)
-
 export STYLES='
   window=,black
   border=white,black
@@ -51,7 +50,6 @@ if [ -z "$installation_repo" ]; then
 fi
 case $installation_repo in
   "NEMP Server")
-    cd ../ && rm nemp-server2 -rf && cd nemp-install
     SERVER_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP Server installation directory:" 10 60 "$USER_HOME/nemp-server" 3>&1 1>&2 2>&3)
     if [ -z "$SERVER_INSTALL_DIR" ]; then
       whiptail --msgbox "Invalid installation directory." 10 60
@@ -223,22 +221,30 @@ case $installation_repo in
     cd ../
     ;;
   "NEMP Web Admin")
-    CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/data/www" 3>&1 1>&2 2>&3)
+    CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/nemp/www/$USER" 3>&1 1>&2 2>&3)
     if [ -z "$CLIENT_INSTALL_DIR" ]; then
       whiptail --msgbox "Invalid installation directory." 10 60
       exit 1
     fi
     if [ ! -d "$CLIENT_INSTALL_DIR" ]; then
-      echo "Directory does not exist, creating new: $CLIENT_INSTALL_DIR"
-      mkdir $CLIENT_INSTALL_DIR
+      {
+        mkdir -p $CLIENT_INSTALL_DIR
+        echo -e "XXX\n28\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+        sleep 0.5
+        echo -e "XXX\n74\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+        sleep 0.5
+        echo -e "XXX\n100\nCreated target directory $CLIENT_INSTALL_DIR\nXXX"
+        sleep 1
+      } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $CLIENT_INSTALL_DIR" 15 110 0
+
     fi
-    cd ../
-    rm $CLIENT_INSTALL_DIR/admin -rf && mkdir $CLIENT_INSTALL_DIR/admin && cd $CLIENT_INSTALL_DIR
+    cd $CLIENT_INSTALL_DIR
+    rm admin -rf && mkdir admin
     whiptail --title "Downloading admin web" --gauge "Cloning repository" 6 60 0 < <(
       git clone --progress https://github.com/libersoft-org/nemp-admin-web.git 2>&1 | while read line; do
       percent=$(echo $line | grep -o "[0-9]\{1,3\}%" | tr -d '%')
       percent=${percent:-0}
-      sleep 0.15
+      sleep 1
       done
     )
     cd nemp-admin-web
@@ -247,18 +253,30 @@ case $installation_repo in
     whiptail --msgbox "Downloaded admin web successfully" 15 110
     ;;
   "NEMP Web Client")
-    CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/data/www" 3>&1 1>&2 2>&3)
+    CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/nemp/www/$USER" 3>&1 1>&2 2>&3)
     if [ -z "$CLIENT_INSTALL_DIR" ]; then
       whiptail --msgbox "Invalid installation directory." 10 60
       exit 1
     fi
-    cd ../
-    rm $CLIENT_INSTALL_DIR -rf && mkdir $CLIENT_INSTALL_DIR/client && cd $CLIENT_INSTALL_DIR
+    if [ ! -d "$CLIENT_INSTALL_DIR" ]; then
+      {
+        mkdir -p $CLIENT_INSTALL_DIR
+        echo -e "XXX\n28\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+        sleep 0.5
+        echo -e "XXX\n74\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+        sleep 0.5
+        echo -e "XXX\n100\nCreated target directory $CLIENT_INSTALL_DIR\nXXX"
+        sleep 1
+      } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $CLIENT_INSTALL_DIR" 15 110 0
+
+    fi
+    cd $CLIENT_INSTALL_DIR
+    rm client -rf && mkdir client
     whiptail --title "Downloading client web" --gauge "Cloning repository" 6 60 0 < <(
       git clone --progress https://github.com/libersoft-org/nemp-client-web.git 2>&1 | while read line; do
       percent=$(echo $line | grep -o "[0-9]\{1,3\}%" | tr -d '%')
       percent=${percent:-0}
-      sleep 0.15
+      sleep 1
       done
     )
     cd nemp-client-web
@@ -267,18 +285,30 @@ case $installation_repo in
     whiptail --msgbox "Downloaded client web successfully" 15 110
     ;;
   "WebSocket Developer Console")
-    CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/data/www" 3>&1 1>&2 2>&3)
+    CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/nemp/www/$USER" 3>&1 1>&2 2>&3)
     if [ -z "$CLIENT_INSTALL_DIR" ]; then
       whiptail --msgbox "Invalid installation directory." 10 60
       exit 1
     fi
-    cd ../
-    rm $CLIENT_INSTALL_DIR -rf && mkdir $CLIENT_INSTALL_DIR/console && cd $CLIENT_INSTALL_DIR
+    if [ ! -d "$CLIENT_INSTALL_DIR" ]; then
+      {
+        mkdir -p $CLIENT_INSTALL_DIR
+        echo -e "XXX\n28\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+        sleep 0.5
+        echo -e "XXX\n74\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+        sleep 0.5
+        echo -e "XXX\n100\nCreated target directory $CLIENT_INSTALL_DIR\nXXX"
+        sleep 1
+      } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $CLIENT_INSTALL_DIR" 15 110 0
+
+    fi
+    cd $CLIENT_INSTALL_DIR
+    rm console -rf && mkdir console
     whiptail --title "Downloading console web" --gauge "Cloning repository" 6 60 0 < <(
       git clone --progress https://github.com/libersoft-org/websocket-console.git 2>&1 | while read line; do
       percent=$(echo $line | grep -o "[0-9]\{1,3\}%" | tr -d '%')
       percent=${percent:-0}
-      sleep 0.15
+      sleep 1
       done
     )
     cd nemp-console-web
