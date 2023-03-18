@@ -240,13 +240,23 @@ case $installation_repo in
     fi
     cd $CLIENT_INSTALL_DIR
     rm admin -rf && mkdir admin
-    whiptail --title "Downloading admin web" --gauge "Cloning repository" 6 60 0 < <(
-      git clone --progress https://github.com/libersoft-org/nemp-admin-web.git 2>&1 | while read line; do
-      percent=$(echo $line | grep -o "[0-9]\{1,3\}%" | tr -d '%')
-      percent=${percent:-0}
-      sleep 1
-      done
-    )
+    {
+     git clone --progress https://github.com/libersoft-org/nemp-admin-web.git
+     echo -e "XXX\n20\nCloning into '$CLIENT_INSTALL_DIR'\nXXX"
+     sleep 0.5
+     echo -e "XXX\n34\n Enumerating objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n65\nCounting objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n83\nCompressing objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n90\nReceiving objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n96\nResolving deltas\nXXX"
+     sleep 0.5
+     echo -e "XXX\n100\nClone complete, copying to path....\nXXX"
+     sleep 1
+    } | whiptail --title "Downloading admin web" --gauge "Cloning repository: $CLIENT_INSTALL_DIR" 15 110 0
     cd nemp-admin-web
     mv ./src/* $CLIENT_INSTALL_DIR/admin/
     cd ../ && rm nemp-admin-web -rf
@@ -272,13 +282,23 @@ case $installation_repo in
     fi
     cd $CLIENT_INSTALL_DIR
     rm client -rf && mkdir client
-    whiptail --title "Downloading client web" --gauge "Cloning repository" 6 60 0 < <(
-      git clone --progress https://github.com/libersoft-org/nemp-client-web.git 2>&1 | while read line; do
-      percent=$(echo $line | grep -o "[0-9]\{1,3\}%" | tr -d '%')
-      percent=${percent:-0}
-      sleep 1
-      done
-    )
+    {
+     git clone --progress https://github.com/libersoft-org/nemp-client-web.git
+     echo -e "XXX\n20\nCloning into '$CLIENT_INSTALL_DIR'\nXXX"
+     sleep 0.5
+     echo -e "XXX\n34\n Enumerating objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n65\nCounting objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n83\nCompressing objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n90\nReceiving objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n96\nResolving deltas\nXXX"
+     sleep 0.5
+     echo -e "XXX\n100\nClone complete, copying to path....\nXXX"
+     sleep 1
+    } | whiptail --title "Downloading client web" --gauge "Cloning repository: $CLIENT_INSTALL_DIR" 15 110 0
     cd nemp-client-web
     mv ./src/* $CLIENT_INSTALL_DIR/client/
     cd ../ && rm nemp-client-web -rf
@@ -304,17 +324,27 @@ case $installation_repo in
     fi
     cd $CLIENT_INSTALL_DIR
     rm console -rf && mkdir console
-    whiptail --title "Downloading console web" --gauge "Cloning repository" 6 60 0 < <(
-      git clone --progress https://github.com/libersoft-org/websocket-console.git 2>&1 | while read line; do
-      percent=$(echo $line | grep -o "[0-9]\{1,3\}%" | tr -d '%')
-      percent=${percent:-0}
-      sleep 1
-      done
-    )
-    cd nemp-console-web
+    {
+     git clone --progress https://github.com/libersoft-org/websocket-console.git
+     echo -e "XXX\n20\nCloning into '$CLIENT_INSTALL_DIR'\nXXX"
+     sleep 0.5
+     echo -e "XXX\n34\n Enumerating objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n65\nCounting objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n83\nCompressing objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n90\nReceiving objects\nXXX"
+     sleep 0.5
+     echo -e "XXX\n96\nResolving deltas\nXXX"
+     sleep 0.5
+     echo -e "XXX\n100\nClone complete, copying to path....\nXXX"
+     sleep 1
+    } | whiptail --title "Downloading websocket console" --gauge "Cloning repository: $CLIENT_INSTALL_DIR" 15 110 0
+    cd websocket-console
     mv ./src/* $CLIENT_INSTALL_DIR/console/
-    cd ../ && rm nemp-console-web -rf
-    whiptail --msgbox "Downloaded console web successfully" 15 110
+    cd ../ && rm websocket-console -rf
+    whiptail --msgbox "Downloaded web console successfully" 15 110
     ;;
   *)
     whiptail --msgbox "invalid choice" 15 110
