@@ -14,7 +14,7 @@ if ! command -v whiptail >/dev/null 2>&1; then
   fi
 fi
 # end auto-install
-
+# Define the text to display
 
 USER_HOME=$(getent passwd $USER | cut -d: -f6)
 export STYLES='
@@ -24,7 +24,6 @@ export STYLES='
   button=black,white'
 
 #  select installation
-
 options=(\
  "Yes" "" \
  "No" "" \
@@ -41,315 +40,327 @@ repos=(\
  "NEMP Web Client" "" \
  "WebSocket Developer Console" "" \
 )
-installation_repo=$(whiptail --title "Select software to install" --menu "Choose an option:" 15 110 4 "${repos[@]}" 3>&1 1>&2 2>&3)
-
-# # SERVER:
-if [ -z "$installation_repo" ]; then
- whiptail --msgbox "Nothing selected" 15 110
- exit 1
-fi
-case $installation_repo in
-  "NEMP Server")
-    SERVER_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP Server installation directory:" 10 60 "$USER_HOME/nemp-server" 3>&1 1>&2 2>&3)
-    if [ -z "$SERVER_INSTALL_DIR" ]; then
-      whiptail --msgbox "Invalid installation directory." 10 60
-      exit 1
-    fi
-    if [ ! -d "$SERVER_INSTALL_DIR" ]; then
-      {
-        mkdir $SERVER_INSTALL_DIR
-        echo -e "XXX\n28\nDirectory does not exist, creating new: $SERVER_INSTALL_DIR\nXXX"
-        sleep 0.5
-        echo -e "XXX\n74\nDirectory does not exist, creating new: $SERVER_INSTALL_DIR\nXXX"
-        sleep 0.5
-        echo -e "XXX\n100\nCreated target directory $SERVER_INSTALL_DIR\nXXX"
-        sleep 1
-      } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $SERVER_INSTALL_DIR" 15 110 0
-
-    fi
-    cd $SERVER_INSTALL_DIR
-    case "${os_info[ID]}" in # debian and centos available, more distors to add later
-      "debian")
-        # forcefully update node and npm by uninstalling and reinstalling. uncomment below
-        # apt remove nodejs -f
-        # apt remove npm -f
-        # apt install nodejs -f
-        # apt install npm -f
-
-        {
-          curl -fsSL https://deb.nodesource.com/setup_19.x bash - 
-          echo -e "XXX\n10\nPlease wait while installing node.js...\nXXX"
-          sleep 4
-          echo -e "XXX\n20\nNode.Js installed successfully.\nXXX"
-          sleep 0.5
-          echo -e "XXX\n20\nInstalling packages....\nXXX"
-          apt -y install screen certbot whiptail nodejs curl > /tmp/apt_output.txt 2>&1 &
-          PID=$!
-          while kill -0 $PID >/dev/null 2>&1; do
-              echo "XXX\n20\nInstalling packages: $(tail -n 1 /tmp/apt_output.txt)\nXXX"
-              sleep 4
-          done
-          echo -e "XXX\n45\nPackages installed successfully\nXXX"
-          rm /tmp/apt_output.txt
-          sleep 0.5
-          apt-get install -y npm
-          echo -e "XXX\n45\nInstaling npm...\nXXX"
-          sleep 5
-          echo -e "XXX\n60\nNPM installed successfully.\nXXX"
-          sleep 0.5
-          git clone https://github.com/libersoft-org/nemp-server.git
-          echo -e "XXX\n60\nCloning nemp-server.....\nXXX"
-          sleep 4
-          echo -e "XXX\n95\nNemp server cloned successfully.\nXXX"
-          sleep 0.5
-          cd nemp-server/src
-          npm i
-          echo -e "XXX\n95\nInstaling server npm packages...\nXXX"
-          sleep 5
-          echo -e "XXX\n100\nInstall complete.\nXXX"
-          sleep 1 
-        } | whiptail --title "Server installation" --gauge "Running install...." 15 110 0
-        mv $SERVER_INSTALL_DIR/nemp-server/src/* $SERVER_INSTALL_DIR
-        rm $SERVER_INSTALL_DIR/nemp-server -rf
-        echo "running server install on debian"
-        echo ""
-        ;;
-      "centos")
-        {
-          
-          curl -fsSL https://deb.nodesource.com/setup_19.x | bash -
-          echo -e "XXX\n10\nPlease wait while installing node.js...\nXXX"
-          sleep 4
-          echo -e "XXX\n20\nNode.Js installed successfully.\nXXX"
-          sleep 0.5
-          echo -e "XXX\n20\nInstalling packages....\nXXX"
-          dnf -y install screen certbot whiptail nodejs curl > /tmp/apt_output.txt 2>&1 &
-          PID=$!
-          while kill -0 $PID >/dev/null 2>&1; do
-              echo "XXX\n20\nInstalling packages: $(tail -n 1 /tmp/apt_output.txt)\nXXX"
-              sleep 4
-          done
-          echo -e "XXX\n45\nPackages installed successfully\nXXX"
-          rm /tmp/apt_output.txt
-          sleep 0.5
-          npm i -g npm
-          echo -e "XXX\n45\nInstaling npm...\nXXX"
-          sleep 5
-          echo -e "XXX\n60\nNPM installed successfully.\nXXX"
-          sleep 0.5
-          git clone https://github.com/libersoft-org/nemp-server.git
-          echo -e "XXX\n60\nCloning nemp-server.....\nXXX"
-          sleep 4
-          echo -e "XXX\n95\nNemp server cloned successfully.\nXXX"
-          sleep 0.5
-          cd nemp-server/src
-          npm i # nto working here for some reason
-          echo ls
-          echo -e "XXX\n95\nInstaling server npm packages...\nXXX"
-          sleep 5
-          echo -e "XXX\n100\nInstall complete.\nXXX"
-          sleep 1
-        } | whiptail --title "Server installation" --gauge "Running install...." 15 110 0
-        echo "running server install on centos"
-        ;;
-    esac
-    init_settings=$(whiptail --title "Create settings" --menu "Would you like to create a new server settings file?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
-    case $init_settings in
-      "No")
-        whiptail --msgbox "Installed server, exiting...." 15 110
+while true; do
+  installation_repo=$(whiptail --title "Select software to install" --menu "Choose an option:" 15 110 4 "${repos[@]}" --default-item "$installation_repo" 3>&1 1>&2 2>&3)
+  if [ $? -ne 0 ]; then
+        break
+  fi
+  if [ -z "$installation_repo" ]; then
+  whiptail --msgbox "Nothing selected" 15 110
+  exit 1
+  fi
+  case $installation_repo in
+    "NEMP Server")
+      domain_install_instucions="Add this domain record in your DNS for your NEMP server:\n**A** record of your NEMP server, eg.: **A - nemp.domain.tld** targeting your NEMP server IP address\n\nNow for each domain you'd like to use with your NEMP server add this record:-\n**TXT** record that identifies your NEMP server, eg.: **domain.tld TXT nemp=nemp.domain.tld:443**"
+      whiptail --title "Add a valid domain name" --msgbox "$domain_install_instucions" 15 110
+      SERVER_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP Server installation directory:" 10 60 "$USER_HOME/nemp-server" 3>&1 1>&2 2>&3)
+      if [ -z "$SERVER_INSTALL_DIR" ]; then
+        whiptail --msgbox "Invalid installation directory." 10 60
         exit 1
-        ;;
-      "Yes")
-        echo ""
-        node index.js --create-settings
+      fi
+      if [ ! -d "$SERVER_INSTALL_DIR" ]; then
         {
-          echo -e "XXX\n45\nInitializing settings....\nXXX"
+          mkdir $SERVER_INSTALL_DIR
+          echo -e "XXX\n28\nDirectory does not exist, creating new: $SERVER_INSTALL_DIR\nXXX"
           sleep 0.5
-          echo -e "XXX\n92\nInitializing settings....\nXXX"
+          echo -e "XXX\n74\nDirectory does not exist, creating new: $SERVER_INSTALL_DIR\nXXX"
           sleep 0.5
-          echo -e "XXX\n100\nCreated default settings\nXXX"
+          echo -e "XXX\n100\nCreated target directory $SERVER_INSTALL_DIR\nXXX"
           sleep 1
-        } | whiptail --title "Server settings installation" --gauge "Initializing settings...." 15 110 0
-     
-        init_https_certificate=$(whiptail --title "Create https certificate" --menu "Would you like to create a new https certificate?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
-        case $init_https_certificate in
-          "No")
-            whiptail --msgbox "Installed server and added default settings, exiting...." 15 110
-            exit 1
-            ;;
-          "Yes")
-            ./cert.sh
-            {
-              echo -e "XXX\n100\nCreated https certificate\nXXX"
-              sleep 1
-            } | whiptail --title "Server settings installation" --gauge "Creating https certificate...." 15 110 0
-
-            init_database=$(whiptail --title "Create admin" --menu "Would you like to create a new database?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
-            case $init_database in
-              "No")
-                whiptail --msgbox "Installed server, added default settings and https certificate, exiting...." 15 110
-                exit 1
-                ;;
-              "Yes")
-                node index.js --create-database
-                {
-                  echo -e "XXX\n59\nCreated database\nXXX"
-                  sleep 1
-                } | whiptail --title "Server settings installation" --gauge "Creating database...." 15 110 0
-        
-                init_admin=$(whiptail --title "Create admin" --menu "Would you like to create a new admin account?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
-                case $init_admin in
-                  "No")
-                    whiptail --msgbox "Installed server, added default settings, https certificate and created new database, exiting...." 15 110
-                    exit 1
-                    ;;
-                  "Yes")
-                    node index.js --create-admin
-                    {
-                      echo -e "XXX\n100\nCreated admin\nXXX"
-                      sleep 1
-                    } | whiptail --title "Server settings installation" --gauge "Creating admin...." 15 110 0
-                    whiptail --msgbox "Installed server completed successfully\n\nYou can start the server by running './start.sh'\nAttach to the screen by running 'screen -x nemp'\n\nAdditionally, you can start by running 'node index.js'.\nTo stop the server just press **CTRL+C**" 15 110
-                      ;;
-                esac
+        } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $SERVER_INSTALL_DIR" 15 110 0
+      else
+        {
+          rm $SERVER_INSTALL_DIR -rf
+          echo -e "XXX\n28\nDirectory already exists, updating contents: $SERVER_INSTALL_DIR\nXXX"
+          sleep 0.5
+          mkdir $SERVER_INSTALL_DIR 
+          echo -e "XXX\n74\nDirectory already exists, updating contents: $SERVER_INSTALL_DIR\nXXX"
+          sleep 0.5
+          echo -e "XXX\n100\nCreated target directory $SERVER_INSTALL_DIR\nXXX"
+          sleep 1
+        } | whiptail --title "Invalid directory" --gauge "Directory already exists, updating contents: $SERVER_INSTALL_DIR" 15 110 0
+      fi
+      cd $SERVER_INSTALL_DIR
+      case "${os_info[ID]}" in # debian and centos available, more distors to add later
+        "debian")
+          # apt-get install aptitude
+          # aptitude install npm
+          # exit 1
+          {
+            curl -fsSL https://deb.nodesource.com/setup_19.x | bash -
+            echo -e "XXX\n10\nPlease wait while installing node.js...\nXXX"
+            sleep 4
+            echo -e "XXX\n20\nNode.Js installed successfully.\nXXX"
+            sleep 0.5
+            echo -e "XXX\n20\nInstalling packages....\nXXX"
+            apt -y install screen certbot whiptail nodejs curl aptitude > /tmp/apt_output.txt 2>&1 &
+            PID=$!
+            while kill -0 $PID >/dev/null 2>&1; do
+                echo "XXX\n20\nInstalling packages: $(tail -n 1 /tmp/apt_output.txt)\nXXX"
+                sleep 4
+            done
+            sleep 0.5
+            echo -e "XXX\n40\nPackages installed successfully, fetching npm package....\nXXX"
+            rm /tmp/apt_output.txt
+            sleep 0.5
+            aptitude install -y npm
+            echo -e "XXX\n45\nInstaling npm...\nXXX"
+            sleep 5
+            echo -e "XXX\n60\nNPM installed successfully.\nXXX"
+            sleep 0.5
+            git clone https://github.com/libersoft-org/nemp-server.git
+            echo -e "XXX\n60\nCloning nemp-server.....\nXXX"
+            sleep 3
+            echo -e "XXX\n95\nNemp server cloned successfully.\nXXX"
+            sleep 0.5
+            cd nemp-server/src
+            npm i
+            echo -e "XXX\n95\nInstaling server npm packages...\nXXX"
+            sleep 5
+            echo -e "XXX\n100\nInstall complete.\nXXX"
+            sleep 1 
+          } | whiptail --title "Server installation" --gauge "Running install...." 15 110 0
+          mv $SERVER_INSTALL_DIR/nemp-server/src/* $SERVER_INSTALL_DIR
+          rm $SERVER_INSTALL_DIR/nemp-server -rf
+          echo "running server install on debian"
+          echo ""
+          ;;
+        "centos")
+          {
+            curl -fsSL https://deb.nodesource.com/setup_19.x | bash -
+            echo -e "XXX\n10\nPlease wait while installing node.js...\nXXX"
+            sleep 4
+            echo -e "XXX\n20\nNode.Js installed successfully.\nXXX"
+            sleep 0.5
+            echo -e "XXX\n20\nInstalling packages....\nXXX"
+            dnf -y install screen certbot whiptail nodejs curl > /tmp/apt_output.txt 2>&1 &
+            PID=$!
+            while kill -0 $PID >/dev/null 2>&1; do
+                echo "XXX\n20\nInstalling packages: $(tail -n 1 /tmp/apt_output.txt)\nXXX"
+                sleep 4
+            done
+            echo -e "XXX\n45\nPackages installed successfully\nXXX"
+            rm /tmp/apt_output.txt
+            sleep 0.5
+            npm i -g npm
+            echo -e "XXX\n45\nInstaling npm...\nXXX"
+            sleep 5
+            echo -e "XXX\n60\nNPM installed successfully.\nXXX"
+            sleep 0.5
+            git clone https://github.com/libersoft-org/nemp-server.git
+            echo -e "XXX\n60\nCloning nemp-server.....\nXXX"
+            sleep 4
+            echo -e "XXX\n95\nNemp server cloned successfully.\nXXX"
+            sleep 0.5
+            cd nemp-server/src
+            npm i
+            echo ls
+            echo -e "XXX\n95\nInstaling server npm packages...\nXXX"
+            sleep 5
+            echo -e "XXX\n100\nInstall complete.\nXXX"
+            sleep 1
+          } | whiptail --title "Server installation" --gauge "Running install...." 15 110 0
+          echo "running server install on centos"
+          ;;
+      esac
+      init_settings=$(whiptail --title "Create settings" --menu "Would you like to create a new server settings file?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
+      case $init_settings in
+        "No")
+          whiptail --msgbox "Installed server, exiting...." 15 110
+          exit 1
+          ;;
+        "Yes")
+          echo ""
+          node index.js --create-settings
+          {
+            echo -e "XXX\n45\nInitializing settings....\nXXX"
+            sleep 0.5
+            echo -e "XXX\n92\nInitializing settings....\nXXX"
+            sleep 0.5
+            echo -e "XXX\n100\nCreated default settings\nXXX"
+            sleep 1
+          } | whiptail --title "Server settings installation" --gauge "Initializing settings...." 15 110 0
+      
+          init_https_certificate=$(whiptail --title "Create https certificate" --menu "Would you like to create a new https certificate?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
+          case $init_https_certificate in
+            "No")
+              whiptail --msgbox "Installed server and added default settings, exiting...." 15 110
+              exit 1
               ;;
-            esac
-            ;;
-        esac
-        ;;
-    esac
-    cd ../
-    ;;
-  "NEMP Web Admin")
-    CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/nemp/www/$USER" 3>&1 1>&2 2>&3)
-    if [ -z "$CLIENT_INSTALL_DIR" ]; then
-      whiptail --msgbox "Invalid installation directory." 10 60
-      exit 1
-    fi
-    if [ ! -d "$CLIENT_INSTALL_DIR" ]; then
-      {
-        mkdir -p $CLIENT_INSTALL_DIR
-        echo -e "XXX\n28\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
-        sleep 0.5
-        echo -e "XXX\n74\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
-        sleep 0.5
-        echo -e "XXX\n100\nCreated target directory $CLIENT_INSTALL_DIR\nXXX"
-        sleep 1
-      } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $CLIENT_INSTALL_DIR" 15 110 0
+            "Yes")
+              ./cert.sh
+              {
+                echo -e "XXX\n100\nCreated https certificate\nXXX"
+                sleep 1
+              } | whiptail --title "Server settings installation" --gauge "Creating https certificate...." 15 110 0
 
-    fi
-    cd $CLIENT_INSTALL_DIR
-    rm admin -rf && mkdir admin
-    {
-     git clone --progress https://github.com/libersoft-org/nemp-admin-web.git
-     echo -e "XXX\n20\nCloning into '$CLIENT_INSTALL_DIR'\nXXX"
-     sleep 0.5
-     echo -e "XXX\n34\n Enumerating objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n65\nCounting objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n83\nCompressing objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n90\nReceiving objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n96\nResolving deltas\nXXX"
-     sleep 0.5
-     echo -e "XXX\n100\nClone complete, copying to path....\nXXX"
-     sleep 1
-    } | whiptail --title "Downloading admin web" --gauge "Cloning repository: $CLIENT_INSTALL_DIR" 15 110 0
-    cd nemp-admin-web
-    mv ./src/* $CLIENT_INSTALL_DIR/admin/
-    cd ../ && rm nemp-admin-web -rf
-    whiptail --msgbox "Downloaded admin web successfully" 15 110
-    ;;
-  "NEMP Web Client")
-    CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/nemp/www/$USER" 3>&1 1>&2 2>&3)
-    if [ -z "$CLIENT_INSTALL_DIR" ]; then
-      whiptail --msgbox "Invalid installation directory." 10 60
-      exit 1
-    fi
-    if [ ! -d "$CLIENT_INSTALL_DIR" ]; then
-      {
-        mkdir -p $CLIENT_INSTALL_DIR
-        echo -e "XXX\n28\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
-        sleep 0.5
-        echo -e "XXX\n74\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
-        sleep 0.5
-        echo -e "XXX\n100\nCreated target directory $CLIENT_INSTALL_DIR\nXXX"
-        sleep 1
-      } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $CLIENT_INSTALL_DIR" 15 110 0
+              init_database=$(whiptail --title "Create admin" --menu "Would you like to create a new database?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
+              case $init_database in
+                "No")
+                  whiptail --msgbox "Installed server, added default settings and https certificate, exiting...." 15 110
+                  exit 1
+                  ;;
+                "Yes")
+                  node index.js --create-database
+                  {
+                    echo -e "XXX\n59\nCreated database\nXXX"
+                    sleep 1
+                  } | whiptail --title "Server settings installation" --gauge "Creating database...." 15 110 0
+          
+                  init_admin=$(whiptail --title "Create admin" --menu "Would you like to create a new admin account?:" 15 110 4 "${options[@]}" 3>&1 1>&2 2>&3)
+                  case $init_admin in
+                    "No")
+                      whiptail --msgbox "Installed server, added default settings, https certificate and created new database, exiting...." 15 110
+                      exit 1
+                      ;;
+                    "Yes")
+                      node index.js --create-admin
+                      {
+                        echo -e "XXX\n100\nCreated admin\nXXX"
+                        sleep 1
+                      } | whiptail --title "Server settings installation" --gauge "Creating admin...." 15 110 0
+                      whiptail --msgbox "Installed server completed successfully\n\nYou can start the server by running './start.sh'\nAttach to the screen by running 'screen -x nemp'\n\nAdditionally, you can start by running 'node index.js'.\nTo stop the server just press **CTRL+C**" 15 110
+                        ;;
+                  esac
+                ;;
+              esac
+              ;;
+          esac
+          ;;
+      esac
+      cd ../
+      ;;
+    "NEMP Web Admin")
+      CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/nemp/www/admin" 3>&1 1>&2 2>&3)
+      if [ -z "$CLIENT_INSTALL_DIR" ]; then
+        whiptail --msgbox "Invalid installation directory." 10 60
+        exit 1
+      fi
+      if [ ! -d "$CLIENT_INSTALL_DIR" ]; then
+        {
+          mkdir -p $CLIENT_INSTALL_DIR
+          echo -e "XXX\n28\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+          sleep 0.5
+          echo -e "XXX\n74\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+          sleep 0.5
+          echo -e "XXX\n100\nCreated target directory $CLIENT_INSTALL_DIR\nXXX"
+          sleep 1
+        } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $CLIENT_INSTALL_DIR" 15 110 0
 
-    fi
-    cd $CLIENT_INSTALL_DIR
-    rm client -rf && mkdir client
-    {
-     git clone --progress https://github.com/libersoft-org/nemp-client-web.git
-     echo -e "XXX\n20\nCloning into '$CLIENT_INSTALL_DIR'\nXXX"
-     sleep 0.5
-     echo -e "XXX\n34\n Enumerating objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n65\nCounting objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n83\nCompressing objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n90\nReceiving objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n96\nResolving deltas\nXXX"
-     sleep 0.5
-     echo -e "XXX\n100\nClone complete, copying to path....\nXXX"
-     sleep 1
-    } | whiptail --title "Downloading client web" --gauge "Cloning repository: $CLIENT_INSTALL_DIR" 15 110 0
-    cd nemp-client-web
-    mv ./src/* $CLIENT_INSTALL_DIR/client/
-    cd ../ && rm nemp-client-web -rf
-    whiptail --msgbox "Downloaded client web successfully" 15 110
-    ;;
-  "WebSocket Developer Console")
-    CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/nemp/www/$USER" 3>&1 1>&2 2>&3)
-    if [ -z "$CLIENT_INSTALL_DIR" ]; then
-      whiptail --msgbox "Invalid installation directory." 10 60
-      exit 1
-    fi
-    if [ ! -d "$CLIENT_INSTALL_DIR" ]; then
+      fi
+      cd $CLIENT_INSTALL_DIR
+      rm admin -rf && mkdir admin
       {
-        mkdir -p $CLIENT_INSTALL_DIR
-        echo -e "XXX\n28\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
-        sleep 0.5
-        echo -e "XXX\n74\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
-        sleep 0.5
-        echo -e "XXX\n100\nCreated target directory $CLIENT_INSTALL_DIR\nXXX"
-        sleep 1
-      } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $CLIENT_INSTALL_DIR" 15 110 0
+      git clone --progress https://github.com/libersoft-org/nemp-admin-web.git
+      echo -e "XXX\n20\nCloning into '$CLIENT_INSTALL_DIR'\nXXX"
+      sleep 0.5
+      echo -e "XXX\n34\n Enumerating objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n65\nCounting objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n83\nCompressing objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n90\nReceiving objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n96\nResolving deltas\nXXX"
+      sleep 0.5
+      echo -e "XXX\n100\nClone complete, copying to path....\nXXX"
+      sleep 1
+      } | whiptail --title "Downloading admin web" --gauge "Cloning repository: $CLIENT_INSTALL_DIR" 15 110 0
+      cd nemp-admin-web
+      mv ./src/* $CLIENT_INSTALL_DIR/admin/
+      cd ../ && rm nemp-admin-web -rf
+      whiptail --msgbox "Downloaded admin web successfully" 15 110
+      ;;
+    "NEMP Web Client")
+      CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/nemp/www/client" 3>&1 1>&2 2>&3)
+      if [ -z "$CLIENT_INSTALL_DIR" ]; then
+        whiptail --msgbox "Invalid installation directory." 10 60
+        exit 1
+      fi
+      if [ ! -d "$CLIENT_INSTALL_DIR" ]; then
+        {
+          mkdir -p $CLIENT_INSTALL_DIR
+          echo -e "XXX\n28\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+          sleep 0.5
+          echo -e "XXX\n74\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+          sleep 0.5
+          echo -e "XXX\n100\nCreated target directory $CLIENT_INSTALL_DIR\nXXX"
+          sleep 1
+        } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $CLIENT_INSTALL_DIR" 15 110 0
 
-    fi
-    cd $CLIENT_INSTALL_DIR
-    rm console -rf && mkdir console
-    {
-     git clone --progress https://github.com/libersoft-org/websocket-console.git
-     echo -e "XXX\n20\nCloning into '$CLIENT_INSTALL_DIR'\nXXX"
-     sleep 0.5
-     echo -e "XXX\n34\n Enumerating objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n65\nCounting objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n83\nCompressing objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n90\nReceiving objects\nXXX"
-     sleep 0.5
-     echo -e "XXX\n96\nResolving deltas\nXXX"
-     sleep 0.5
-     echo -e "XXX\n100\nClone complete, copying to path....\nXXX"
-     sleep 1
-    } | whiptail --title "Downloading websocket console" --gauge "Cloning repository: $CLIENT_INSTALL_DIR" 15 110 0
-    cd websocket-console
-    mv ./src/* $CLIENT_INSTALL_DIR/console/
-    cd ../ && rm websocket-console -rf
-    whiptail --msgbox "Downloaded web console successfully" 15 110
-    ;;
-  *)
-    whiptail --msgbox "invalid choice" 15 110
-    ;;
-esac
+      fi
+      cd $CLIENT_INSTALL_DIR
+      rm client -rf && mkdir client
+      {
+      git clone --progress https://github.com/libersoft-org/nemp-client-web.git
+      echo -e "XXX\n20\nCloning into '$CLIENT_INSTALL_DIR'\nXXX"
+      sleep 0.5
+      echo -e "XXX\n34\n Enumerating objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n65\nCounting objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n83\nCompressing objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n90\nReceiving objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n96\nResolving deltas\nXXX"
+      sleep 0.5
+      echo -e "XXX\n100\nClone complete, copying to path....\nXXX"
+      sleep 1
+      } | whiptail --title "Downloading client web" --gauge "Cloning repository: $CLIENT_INSTALL_DIR" 15 110 0
+      cd nemp-client-web
+      mv ./src/* $CLIENT_INSTALL_DIR/client/
+      cd ../ && rm nemp-client-web -rf
+      whiptail --msgbox "Downloaded client web successfully" 15 110
+      ;;
+    "WebSocket Developer Console")
+      CLIENT_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP web installation directory:" 10 60 "$USER_HOME/nemp/www/console" 3>&1 1>&2 2>&3)
+      if [ -z "$CLIENT_INSTALL_DIR" ]; then
+        whiptail --msgbox "Invalid installation directory." 10 60
+        exit 1
+      fi
+      if [ ! -d "$CLIENT_INSTALL_DIR" ]; then
+        {
+          mkdir -p $CLIENT_INSTALL_DIR
+          echo -e "XXX\n28\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+          sleep 0.5
+          echo -e "XXX\n74\nDirectory does not exist, creating new: $CLIENT_INSTALL_DIR\nXXX"
+          sleep 0.5
+          echo -e "XXX\n100\nCreated target directory $CLIENT_INSTALL_DIR\nXXX"
+          sleep 1
+        } | whiptail --title "Invalid directory" --gauge "Directory does not exist, creating new: $CLIENT_INSTALL_DIR" 15 110 0
+
+      fi
+      cd $CLIENT_INSTALL_DIR
+      rm console -rf && mkdir console
+      {
+      git clone --progress https://github.com/libersoft-org/websocket-console.git
+      echo -e "XXX\n20\nCloning into '$CLIENT_INSTALL_DIR'\nXXX"
+      sleep 0.5
+      echo -e "XXX\n34\n Enumerating objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n65\nCounting objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n83\nCompressing objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n90\nReceiving objects\nXXX"
+      sleep 0.5
+      echo -e "XXX\n96\nResolving deltas\nXXX"
+      sleep 0.5
+      echo -e "XXX\n100\nClone complete, copying to path....\nXXX"
+      sleep 1
+      } | whiptail --title "Downloading websocket console" --gauge "Cloning repository: $CLIENT_INSTALL_DIR" 15 110 0
+      cd websocket-console
+      mv ./src/* $CLIENT_INSTALL_DIR/console/
+      cd ../ && rm websocket-console -rf
+      whiptail --msgbox "Downloaded web console successfully" 15 110
+      ;;
+    *)
+      whiptail --msgbox "invalid choice" 15 110
+      ;;
+  esac
+done
 # SERVER_INSTALL_DIR=$(whiptail --title "NEMP Server installer" --inputbox "NEMP Server installation directory:" 10 60 "$USER_HOME/nemp-server" 3>&1 1>&2 2>&3)
 # if [ -z "$SERVER_INSTALL_DIR" ]; then
 #  whiptail --msgbox "Invalid installation directory." 10 60
