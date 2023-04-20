@@ -1,5 +1,9 @@
 # The New E-Mail Protocol (NEMP) - server and client software installer
 
+This repository helps you to easily install NEMP Software on your server.
+
+If you just want to get your free NEMP mailbox hosted on our server, please navigate to: **https://nemp.io**
+
 ## Related repositories
 
 - [**NEMP Protocol**](https://github.com/libersoft-org/nemp-protocol) - NEMP protocol documentation
