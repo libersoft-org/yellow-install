@@ -1,4 +1,4 @@
-# The New E-Mail Protocol (NEMP) - server and client software installer
+# NEMP Installer
 
 This repository helps you to easily install NEMP Software on your server.
 
