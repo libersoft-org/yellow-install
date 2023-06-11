@@ -1,5 +1,7 @@
 # NEMP Installer
 
+[![Created Badge](https://badges.pufler.dev/created/libersoft-org/nemp-install)](https://badges.pufler.dev) [![Updated Badge](https://badges.pufler.dev/updated/libersoft-org/nemp-install)](https://badges.pufler.dev) [![Visits Badge](https://badges.pufler.dev/visits/libersoft-org/nemp-install)](https://badges.pufler.dev)
+
 This repository helps you to easily install NEMP Software on your server.
 
 If you just want to get your free NEMP mailbox hosted on our server, please navigate to: **https://nemp.io**
