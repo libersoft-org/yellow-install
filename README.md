@@ -4,7 +4,9 @@
 
 This repository helps you to easily install NEMP Software on your server.
 
-If you just want to get your free NEMP mailbox hosted on our server, please navigate to: **https://nemp.io**
+If you just want to get your free NEMP mailbox hosted on our server, please navigate to:
+
+[![NEMP.io](https://raw.githubusercontent.com/libersoft-org/nemp-documentation/main/logo.png)](https://nemp.io)
 
 ## Related repositories
 
