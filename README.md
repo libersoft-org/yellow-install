@@ -1,21 +1,22 @@
-# NEMP Installer
+# Yellow Installer
 
-[![Created Badge](https://badges.pufler.dev/created/libersoft-org/nemp-install)](https://badges.pufler.dev) [![Updated Badge](https://badges.pufler.dev/updated/libersoft-org/nemp-install)](https://badges.pufler.dev) [![Visits Badge](https://badges.pufler.dev/visits/libersoft-org/nemp-install)](https://badges.pufler.dev)
+[![Created Badge](https://badges.pufler.dev/created/libersoft-org/yellow-install)](https://badges.pufler.dev) [![Updated Badge](https://badges.pufler.dev/updated/libersoft-org/yellow-install)](https://badges.pufler.dev) [![Visits Badge](https://badges.pufler.dev/visits/libersoft-org/yellow-install)](https://badges.pufler.dev)
 
-This repository helps you to easily install NEMP Software on your server.
+This repository helps you to easily install [**Yellow**](https://yellow.libersoft.org) software on your server.
 
-If you just want to get your free NEMP mailbox hosted on our server, please navigate to:
+If you just want to get your free [**Yellow**](https://yellow.libersoft.org) account hosted on our server, please navigate to:
 
-[![NEMP.io](https://raw.githubusercontent.com/libersoft-org/nemp-documentation/main/logo.png)](https://nemp.io)
+[![YellowNet.io](https://raw.githubusercontent.com/libersoft-org/odtp-documentation/main/logo.png)](https://yellownet.io)
 
 ## Related repositories
 
-- [**NEMP Protocol**](https://github.com/libersoft-org/nemp-protocol) - NEMP protocol documentation
-- [**NEMP Install**](https://github.com/libersoft-org/nemp-install) - Installer for NEMP server and client software
-- [**NEMP Server**](https://github.com/libersoft-org/nemp-server) - Server implementation of NEMP protocol
-- [**NEMP Web Admin**](https://github.com/libersoft-org/nemp-admin-web) - Web administration software for NEMP Server
-- [**NEMP Web Client**](https://github.com/libersoft-org/nemp-client-web) - Web client implementation of NEMP protocol
-- [**WebSocket Developer Console**](https://github.com/libersoft-org/websocket-console) - Web application that helps developers to communicate easily with NEMP Server using JSON commands
+- [**ODTP Protocol**](https://github.com/libersoft-org/odtp-protocol) - ODTP protocol documentation
+- [**Yellow Install**](https://github.com/libersoft-org/yellow-install) - Installer for Yellow software
+- [**Yellow Server**](https://github.com/libersoft-org/yellow-server) - Server implementation of ODTP protocol
+- [**Yellow Command Line Admin**](https://github.com/libersoft-org/yellow-admin-web) - Web administration software for Yellow Server
+- [**Yellow Web Admin**](https://github.com/libersoft-org/yellow-admin-web) - Web administration software for Yellow Server
+- [**Yellow Web Client**](https://github.com/libersoft-org/yellow-client-web) - Web client implementation of Yellow protocol
+- [**WebSocket Developer Console**](https://github.com/libersoft-org/websocket-console) - Web application that helps developers to communicate easily with Yellow Server using JSON commands
 
 ## Installation
 
@@ -32,8 +33,8 @@ cd /root/
 apt update
 apt -y upgrade
 apt -y install git curl
-git clone https://github.com/libersoft-org/nemp-install.git
-cd nemp-install
+git clone https://github.com/libersoft-org/yellow-install.git
+cd yellow-install
 ./install.sh
 ```
 
@@ -45,8 +46,8 @@ Log in as "root" on your server and run the following commands to download the n
 cd /root/
 dnf -y update
 dnf -y install git curl
-git clone https://github.com/libersoft-org/nemp-install.git
-cd nemp-install
+git clone https://github.com/libersoft-org/yellow-install.git
+cd yellow-install
 ./install.sh
 ```
 
@@ -66,4 +67,4 @@ Thank you for being a part of our projects' success!
 
 ## Star history
 
-[![Star History Chart](https://api.star-history.com/svg?repos=libersoft-org/nemp-install&type=Date)](https://star-history.com/#libersoft-org/nemp-install&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=libersoft-org/yellow-install&type=Date)](https://star-history.com/#libersoft-org/yellow-install&Date)
